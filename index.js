@@ -238,8 +238,7 @@ async function main() {
         suffix: outputSign.sign.split(":")[3],
         sha1_index: arrSha1Index,
         constant_checksum: arrNumConstantChecksum,
-        constant_checksum_sum: constantChecksum,
-        sign_example: outputSign.sign
+        constant_checksum_sum: constantChecksum
     };
     
     console.log(`Save information to: output/data.json`)
