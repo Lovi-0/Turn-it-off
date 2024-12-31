@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -27,9 +26,10 @@ jobs:
         run: |
           node index.js
 
-      - name: Overwrite existing files
+      - name: Pull remote changes
         run: |
-          rm -rf output/*
+          git fetch origin
+          git merge origin/main || echo "No changes to merge"
 
       - name: Configure Git
         run: |
@@ -39,11 +39,10 @@ jobs:
       - name: Commit changes
         run: |
           git add .
-          git commit -m "Aggiornamento automatico file tramite GitHub Actions" || echo "Nessun cambiamento da committare"
+          git commit -m "Update output" || echo "No changes"
 
       - name: Push changes
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: main
-          force: true
