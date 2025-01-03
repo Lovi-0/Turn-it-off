@@ -1,3 +1,5 @@
+// 03.01.25
+
 import { parse as parseHTML } from 'node-html-parser';
 import path from 'path';
 import fs from 'fs';
@@ -235,4 +237,29 @@ export function findAppToken(scriptText) {
     });
 
     return appToken;
+}
+
+
+export function findModuleNumber(scriptText, moduleName) {
+    const ast = parser.parse(scriptText);
+    let moduleNumber = null;
+
+    traverse(ast, {
+        ArrayExpression(path) {
+            const elements = path.node.elements;
+            if (elements?.length > 0 && elements[0]?.value === parseInt(moduleName)) {
+                path.parentPath.traverse({
+                    ObjectProperty(innerPath) {
+                        if (innerPath.node.key?.type === 'NumericLiteral' && 
+                            innerPath.node.key.value.toString().includes(moduleName)) {
+                            moduleNumber = innerPath.node.key.value;
+                            return;
+                        }
+                    }
+                });
+            }
+        }
+    });
+
+    return moduleNumber;
 }

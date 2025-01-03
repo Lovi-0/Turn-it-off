@@ -1,7 +1,8 @@
+// 03.01.25
+
 import parser from '@babel/parser';
 import _generator from '@babel/generator';
 import _traverse from "@babel/traverse";
-
 import fs from 'fs';
 import vm from 'vm';
 
@@ -9,11 +10,15 @@ import * as utils from './Src/util.js';
 
 const generator = _generator.default;
 const traverse = _traverse.default;
+
 const POSSIBLE_MATH_OPERATIONS = {
     '+': '_add', 
     '-': '_sub', 
     '%': '_mod'
 };
+const SCRIPT_MAIN = '2313';
+const SCRIPT_APP = 'app';
+
 
 
 function findMathFunction(ast) {
@@ -152,8 +157,8 @@ function executeScript(scriptCode) {
 }
 
 
-function callMainScript(contextExe) {
-    const mainFunctionToCall = contextExe[0][1]['802313'];
+function callMainScript(contextExe, moduleNumber) {
+    const mainFunctionToCall = contextExe[0][1][moduleNumber];
     const W = {};
     const n = {};
     let messagePass = null;
@@ -195,7 +200,7 @@ async function main() {
     utils.createFolderIfNotExist("output");
 
     const htmlText = await utils.getHtmlText('https://onlyfans.com');
-    const scripts = await utils.parseHtmlScript(htmlText, '2313', 'app');
+    const scripts = await utils.parseHtmlScript(htmlText, SCRIPT_MAIN, SCRIPT_APP);
     
     if (!scripts.main || !scripts.app) {
         console.error('[ERROR] Failed to retrieve scripts');
@@ -203,14 +208,14 @@ async function main() {
     }
 
     const { scriptText, scriptName } = scripts.main;
-    const revDate = scriptName.split("-")[0].split("/").at(-1);
-    console.log("Rev date: ", revDate);
-
-    utils.writeScript(`output/2313.js`, scriptText);
+    const revisionDate = scriptName.split("-")[0].split("/").at(-1).replace(/^(\d{4})(\d{2})(\d{2}).*$/, "$1-$2-$3");
+    const revisionKey = scriptName.split("/").at(-2);
+    utils.writeScript(`output/${SCRIPT_MAIN}.js`, scriptText);
 
     const appToken = utils.findAppToken(scripts.app.scriptText);
     console.log('[INFO] Found app token:', appToken);
 
+    const modueleNumber = utils.findModuleNumber(scriptText, SCRIPT_MAIN);
     const ast = parser.parse(scriptText);
     const mathFunction = findMathFunction(ast);
     const mathNames = findMathVariableNames(mathFunction);
@@ -222,7 +227,7 @@ async function main() {
     utils.writeScript(`output/decrypt.js`, newCode);
 
     const contextExe = executeScript(newCode);
-    const { output: outputSign, messagePass, messageSha1 } = callMainScript(contextExe.self.webpackChunkof_vue);
+    const { output: outputSign, messagePass, messageSha1 } = callMainScript(contextExe.self.webpackChunkof_vue, modueleNumber);
 
     const { checksum: arrNumConstantChecksum, checksum_index: arrSha1Index } = utils.parseOperationLog(contextExe.log);
     const constantChecksum = arrNumConstantChecksum.reduce((acc, val) => acc + val, 0);
@@ -231,23 +236,28 @@ async function main() {
     console.log("Output msg:", messageSha1);
 
     const output = {
-        rev_date: revDate,
+        rev_date: revisionDate,
+        rev_full: revisionKey,
+        module_name: SCRIPT_MAIN,
+        module_number: modueleNumber,
         app_token: appToken,
         msg: messagePass.split("\n")[0],
         prefix: outputSign.sign.split(":")[0],
         suffix: outputSign.sign.split(":")[3],
+        sign_format: `${outputSign.sign.split(":")[0]}:{sha}:{checksum}:${outputSign.sign.split(":")[3]}`,
         sha1_index: arrSha1Index,
         constant_checksum: arrNumConstantChecksum,
         constant_checksum_sum: constantChecksum
     };
     
-    console.log(`Save information to: output/data.json`)
+    console.log(`Save information to: output/data.json`);
     const outputJSON = JSON.stringify(output, (key, value) => {
         if (Array.isArray(value)) {
-            return value.join(', ');
+            return `[${value.join(', ')}]`;
         }
         return value;
-    }, 4);
+    }, 4).replace(/"\[/g, '[').replace(/\]"/g, ']');
+    
     fs.writeFileSync(`output/data.json`, outputJSON);
 }
 
