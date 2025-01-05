@@ -258,7 +258,7 @@ async function main() {
         return value;
     }, 4).replace(/"\[/g, '[').replace(/\]"/g, ']');
     
-    fs.writeFileSync(`output/data.json`, outputJSON);
+    fs.writeFileSync(`output/rules.json`, outputJSON);
 }
 
 
