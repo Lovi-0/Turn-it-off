@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="output/logo.jpg" alt="Turn it Off Logo" width="300">
+    <img src="Img/logo.jpg" alt="Turn it Off Logo" width="300">
 </div>
 
 ## Requirements
@@ -9,7 +9,7 @@
 ## Usage
 To use the rules, you can either download the JSON from the link below or integrate with the API.
 
-- [Download the rules](https://raw.githubusercontent.com/Lovi-0/Turn-it-off/refs/heads/main/output/data.json)
+- [Download the rules](https://raw.githubusercontent.com/Lovi-0/Turn-it-off/refs/heads/main/output/rules.json)
 
 ## Initial Documentation
 For more details on how the dynamic rule system works and how to manage rules, check out the documentation for the 

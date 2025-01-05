@@ -25,9 +25,22 @@ def create_headers(cookies, xbc, user_agent, app_token, static_param, checksum_c
         'cookie': cookie_string
     }
 
+def fetch_rules(url):
+    try:
+        response = httpx.get(url, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    
+    except Exception as e:
+        print(f"An error occurred: {str(e)}", file=sys.stderr)
+
+    return None
+
 def call_api(cookies, xbc, user_agent, path):
     time.sleep(1)
-    rules = httpx.get("https://raw.githubusercontent.com/Lovi-0/Turn-it-off/refs/heads/main/output/data.json", timeout=10).json()
+    
+    rules_url = "https://raw.githubusercontent.com/Lovi-0/Turn-it-off/refs/heads/main/output/rules.json"
+    rules = fetch_rules(rules_url)
 
     app_token = rules['app_token']
     static_param = rules['msg']
@@ -41,13 +54,13 @@ def call_api(cookies, xbc, user_agent, path):
 
     if response.status_code == 200:
         return response.json()
+    
     else:
         print(f'Error: {response.status_code}, response text: {response.text}', file=sys.stderr)
         return None
-
 
 # Main
 cookies = {}
 xbc = ''
 user_agent = ''
-print(call_api(cookies, xbc, user_agent, '/api2/v2/users/me'))
+print(call_api(cookies, xbc, user_agent,'/api2/v2/users/me'))

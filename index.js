@@ -250,7 +250,7 @@ async function main() {
         constant_checksum_sum: constantChecksum
     };
     
-    console.log(`Save information to: output/data.json`);
+    console.log(`Save information to: output/rules.json`);
     const outputJSON = JSON.stringify(output, (key, value) => {
         if (Array.isArray(value)) {
             return `[${value.join(', ')}]`;
