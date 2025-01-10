@@ -176,7 +176,6 @@ function callMainScript(contextExe, moduleNumber) {
             };
         } else if (mod === 858156) {
             return function (n, t, r) {
-                console.log("RETURN : ", r )
                 return r;
             };
         } else {
@@ -208,7 +207,10 @@ async function main() {
     }
 
     const { scriptText, scriptName } = scripts.main;
+    console.log("=>", scriptName.split("-")[0].split("/").at(-1))
+
     const revisionDate = scriptName.split("-")[0].split("/").at(-1).replace(/^(\d{4})(\d{2})(\d{2}).*$/, "$1-$2-$3");
+    const revisionTime = scriptName.split("-")[0].split("/").at(-1).replace(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2}).*$/, "$4:$5");
     const revisionKey = scriptName.split("/").at(-2);
     utils.writeScript(`output/${SCRIPT_MAIN}.js`, scriptText);
 
@@ -231,12 +233,12 @@ async function main() {
 
     const { checksum: arrNumConstantChecksum, checksum_index: arrSha1Index } = utils.parseOperationLog(contextExe.log);
     const constantChecksum = arrNumConstantChecksum.reduce((acc, val) => acc + val, 0);
-    console.log("Output log:", contextExe.log);
-    console.log("Output sign:", messagePass);
-    console.log("Output msg:", messageSha1);
+    //console.log("Output log:", contextExe.log);
+    //console.log("Output sign:", messagePass);
+    //console.log("Output msg:", messageSha1);
 
     const output = {
-        rev_date: revisionDate,
+        rev_date: `${revisionDate} ${revisionTime}`,
         rev_full: revisionKey,
         module_name: SCRIPT_MAIN,
         module_number: modueleNumber,
@@ -245,8 +247,8 @@ async function main() {
         prefix: outputSign.sign.split(":")[0],
         suffix: outputSign.sign.split(":")[3],
         sign_format: `${outputSign.sign.split(":")[0]}:{sha}:{checksum}:${outputSign.sign.split(":")[3]}`,
-        sha1_index: arrSha1Index,
-        constant_checksum: arrNumConstantChecksum,
+        sha1_index: arrSha1Index.sort(),
+        constant_checksum: arrNumConstantChecksum.sort(),
         constant_checksum_sum: constantChecksum
     };
     
